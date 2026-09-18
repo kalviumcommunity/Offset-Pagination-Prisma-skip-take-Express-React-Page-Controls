@@ -1,6 +1,11 @@
-import apiClient from "./apiClient";
+import axios from "axios";
 
-export async function getThreads() {
-  const res = await apiClient.get("/api/threads");
-  return res.data.threads;
-}
+export const getThreads = async (page) => {
+  const res = await axios.get("/threads", {
+    params: {
+      page,
+    },
+  });
+
+  return res.data;
+};
