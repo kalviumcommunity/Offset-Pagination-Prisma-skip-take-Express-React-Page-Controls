@@ -5,8 +5,15 @@ const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const threads = await prisma.thread.findMany({
-      orderBy: { createdAt: "desc" },
+    const pageSize = 10;
+    const page = Number(req.query.page) || 1;
+    const skip = (page - 1) * pageSize;
+
+    const [threads, total] = await Promise.all([
+      prisma.thread.findMany({
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: "desc" },
       include: {
         author: {
           select: {
@@ -22,7 +29,9 @@ router.get("/", async (req, res, next) => {
       },
     });
 
-    res.json({ threads });
+    const hasMore = total > page * pageSize;
+
+    res.json({ threads, total, hasMore });
   } catch (error) {
     next(error);
   }
