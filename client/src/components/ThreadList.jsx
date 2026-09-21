@@ -10,7 +10,7 @@ export default function ThreadList() {
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["threads", { page }],
     queryFn: () => getThreads(page),
-    placeholderData: keepPreviousData,
+    placeholderData: true,
   });
 
   if (isPending) return <p className="muted">Loading threads…</p>;
