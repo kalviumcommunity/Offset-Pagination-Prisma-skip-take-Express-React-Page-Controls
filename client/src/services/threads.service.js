@@ -1,6 +1,11 @@
-import apiClient from "./apiClient";
+import axios from "axios";
 
-export async function getThreads() {
-  const res = await apiClient.get("/api/threads");
-  return res.data.threads;
+const API_URL = import.meta.env.VITE_API_URL;
+
+export async function fetchThreads(page = 1) {
+  const res = await axios.get(`${API_URL}/api/threads`, {
+    params: { page },
+  });
+
+  return res.data;
 }
