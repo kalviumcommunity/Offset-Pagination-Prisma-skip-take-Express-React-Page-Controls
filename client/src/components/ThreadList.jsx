@@ -1,22 +1,59 @@
 import { useQuery } from "@tanstack/react-query";
 import { getThreads } from "../services/threads.service";
 import ThreadItem from "./ThreadItem.jsx";
+import { useState } from "react";
 
-export default function ThreadList() {
-  const { data: threads, isPending, isError, error } = useQuery({
-    queryKey: ["threads"],
-    queryFn: getThreads,
-  });
+function ThreadList() {
+    const [page, setPage] = useState(1);
 
-  if (isPending) return <p className="muted">Loading threads…</p>;
-  if (isError) return <p className="error">Could not load threads: {error.message}</p>;
-  if (!threads || threads.length === 0) return <p className="muted">No threads found.</p>;
+    const {
+        data,
+        isLoading,
+        isError
+    } = useQuery({
+        queryKey: ["threads", { page }],
+        queryFn: () => getThreads(page),
+        placeholderData: keepPreviousData
+    });
 
-  return (
-    <ul className="threads">
-      {threads.map((thread) => (
-        <ThreadItem key={thread.id} thread={thread} />
-      ))}
-    </ul>
-  );
+    if (isLoading) {
+        return <p>Loading...</p>;
+    }
+
+    if (isError) {
+        return <p>Failed to load threads.</p>;
+    }
+
+    return (
+        <div>
+            {data.threads.map((thread) => (
+                <ThreadItem
+                    key={thread.id}
+                    thread={thread}
+                />
+            ))}
+
+            <div>
+                <button
+                    onClick={() => setPage((p) => p - 1)}
+                    disabled={page === 1}
+                >
+                    Previous
+                </button>
+
+                <span>
+                    {" "}Page {page}{" "}
+                </span>
+
+                <button
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={!data.hasMore}
+                >
+                    Next
+                </button>
+            </div>
+        </div>
+    );
 }
+
+export default ThreadList;
